@@ -1,0 +1,4 @@
+# ignore db instances
+*.db
+*.db-shm
+*.db-wal
