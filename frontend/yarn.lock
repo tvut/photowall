@@ -969,7 +969,7 @@ eslint@^9.18.0:
     natural-compare "^1.4.0"
     optionator "^0.9.3"
 
-esm-env@^1.2.1, esm-env@^1.2.2:
+esm-env@^1.0.0, esm-env@^1.2.1, esm-env@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/esm-env/-/esm-env-1.2.2.tgz#263c9455c55861f41618df31b20cb571fc20b75e"
   integrity sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==
@@ -1489,6 +1489,13 @@ rollup@^4.34.9:
     "@rollup/rollup-win32-x64-msvc" "4.53.5"
     fsevents "~2.3.2"
 
+runed@^0.28.0:
+  version "0.28.0"
+  resolved "https://registry.yarnpkg.com/runed/-/runed-0.28.0.tgz#68e2ec076ae921f5e7ca0ebaa37e9f6598775c3c"
+  integrity sha512-k2xx7RuO9hWcdd9f+8JoBeqWtYrm5CALfgpkg2YDB80ds/QE4w0qqu34A7fqiAwiBBSBQOid7TLxwxVC27ymWQ==
+  dependencies:
+    esm-env "^1.0.0"
+
 sade@^1.7.4, sade@^1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/sade/-/sade-1.8.1.tgz#0a78e81d658d394887be57d2a409bf703a3b2701"
@@ -1566,6 +1573,13 @@ svelte-eslint-parser@^1.4.0:
     postcss "^8.4.49"
     postcss-scss "^4.0.9"
     postcss-selector-parser "^7.0.0"
+
+svelte-sonner@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/svelte-sonner/-/svelte-sonner-1.0.7.tgz#7b8a9b99d60e28fd8e2826e42acc29089f2dc0f7"
+  integrity sha512-1EUFYmd7q/xfs2qCHwJzGPh9n5VJ3X6QjBN10fof2vxgy8fYE7kVfZ7uGnd7i6fQaWIr5KvXcwYXE/cmTEjk5A==
+  dependencies:
+    runed "^0.28.0"
 
 svelte@^5.0.0:
   version "5.46.0"

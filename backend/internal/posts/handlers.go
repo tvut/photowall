@@ -227,19 +227,81 @@ func SinglePost(db *sql.DB) http.HandlerFunc {
 
 func DeletePost(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		err := DeletePostDb(db, r.PathValue("slug"))
-		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "Post not found", http.StatusNotFound)
-				return
-			} else {
-				log.Println("error getting post:", err)
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
-				return
-			}
+		slug := r.PathValue("slug")
+		if slug == "" {
+			http.Error(w, "Missing slug parameter", http.StatusBadRequest)
+			return
 		}
+
+		if err := DeletePostDb(db, slug); err != nil {
+			http.Error(w, "Failed to delete post", http.StatusInternalServerError)
+			log.Printf("Error deleting post: %v", err)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+type UpdateStatusRequest struct {
+	Status string `json:"status"`
+}
+
+type UpdateDisplayTimeRequest struct {
+	DisplayTime time.Time `json:"display_time"`
+}
+
+func UpdateStatus(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slug := r.PathValue("slug")
+		if slug == "" {
+			http.Error(w, "Missing slug parameter", http.StatusBadRequest)
+			return
+		}
+
+		var req UpdateStatusRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if req.Status != "draft" && req.Status != "published" {
+			http.Error(w, "Invalid status. Must be 'draft' or 'published'", http.StatusBadRequest)
+			return
+		}
+
+		_, err := db.Exec("UPDATE posts SET status = ? WHERE slug = ?", req.Status, slug)
+		if err != nil {
+			http.Error(w, "Failed to update post status", http.StatusInternalServerError)
+			log.Printf("Error updating post status: %v", err)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func UpdateDisplayTime(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slug := r.PathValue("slug")
+		if slug == "" {
+			http.Error(w, "Missing slug parameter", http.StatusBadRequest)
+			return
+		}
+
+		var req UpdateDisplayTimeRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		_, err := db.Exec("UPDATE posts SET display_time = ? WHERE slug = ?", req.DisplayTime, slug)
+		if err != nil {
+			http.Error(w, "Failed to update display time", http.StatusInternalServerError)
+			log.Printf("Error updating display time: %v", err)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
