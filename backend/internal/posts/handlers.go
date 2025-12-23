@@ -3,6 +3,7 @@ package posts
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -101,6 +102,31 @@ func GetPosts(db *sql.DB) ([]Post, error) {
 	return posts, nil
 }
 
+func GetPost(db *sql.DB, slug string) (Post, error) {
+	var post Post
+	err := db.QueryRow(`
+        SELECT id, title, slug, status, created_at, display_time
+        FROM posts
+        WHERE slug = ?
+    `, slug).Scan(
+		&post.ID,
+		&post.Title,
+		&post.Slug,
+		&post.Status,
+		&post.CreatedAt,
+		&post.DisplayTime,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return Post{}, err
+		}
+		return Post{}, fmt.Errorf("error fetching post: %w", err)
+	}
+
+	return post, nil
+}
+
 func ToDisplay(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -158,5 +184,24 @@ func List(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		json.NewEncoder(w).Encode(posts)
+	}
+}
+
+func SinglePost(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		post, err := GetPost(db, r.PathValue("slug"))
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Post not found", http.StatusNotFound)
+				return
+			} else {
+				log.Println("error getting post:", err)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+		json.NewEncoder(w).Encode(post)
 	}
 }
