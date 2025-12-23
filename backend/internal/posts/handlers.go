@@ -12,6 +12,15 @@ import (
 
 var re = regexp.MustCompile("[^a-zA-Z0-9-]+")
 
+type Post struct {
+	ID          int       `json:"id"`
+	Title       string    `json:"title"`
+	Slug        string    `json:"slug"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	DisplayTime time.Time `json:"display_time"`
+}
+
 type DisplayPost struct {
 	Title       string    `json:"title"`
 	Slug        string    `json:"slug"`
@@ -66,7 +75,33 @@ func GetPublishedPosts(db *sql.DB) ([]DisplayPost, error) {
 	return posts, nil
 }
 
-func List(db *sql.DB) http.HandlerFunc {
+func GetPosts(db *sql.DB) ([]Post, error) {
+	rows, err := db.Query(`
+		SELECT *
+		FROM posts p
+		ORDER BY p.created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Slug, &post.Status, &post.CreatedAt, &post.DisplayTime); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if posts == nil {
+		posts = []Post{}
+	}
+	return posts, nil
+}
+
+func ToDisplay(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -81,25 +116,47 @@ func List(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func Create(w http.ResponseWriter, r *http.Request) {
-	var post CreatePost
+func Create(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var post CreatePost
 
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		log.Println("error decoding request body:", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
+		if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+			log.Println("error decoding request body:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if post.Title == "" {
+			http.Error(w, "Title is required", http.StatusBadRequest)
+			return
+		}
+		if post.DisplayTime.IsZero() {
+			post.DisplayTime = time.Now().UTC()
+		}
+
+		slug := toSlug(post.Title)
+
+		_, err := db.Exec(`INSERT INTO posts (title, slug, display_time) VALUES (?, ?, ?)`, post.Title, slug, post.DisplayTime)
+		if err != nil {
+			log.Println("error creating post:", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("created post: %+v\n slug: %s", post, slug)
+		w.Write([]byte(slug))
 	}
-	if post.Title == "" {
-		http.Error(w, "Title is required", http.StatusBadRequest)
-		return
+}
+
+func List(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		posts, err := GetPosts(db)
+		if err != nil {
+			log.Println("error getting posts:", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(posts)
 	}
-
-	if post.DisplayTime.IsZero() {
-		post.DisplayTime = time.Now()
-	}
-
-	slug := toSlug(post.Title)
-
-	log.Printf("creating post: %+v\n slug: %s", post, slug)
-	w.Write([]byte(slug))
 }

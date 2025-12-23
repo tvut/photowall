@@ -2,3 +2,6 @@
 *.db
 *.db-shm
 *.db-wal
+
+# ignore build
+tmp/
