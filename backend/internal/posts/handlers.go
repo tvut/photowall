@@ -127,6 +127,25 @@ func GetPost(db *sql.DB, slug string) (Post, error) {
 	return post, nil
 }
 
+func DeletePostDb(db *sql.DB, slug string) error {
+	result, err := db.Exec(`
+        DELETE
+        FROM posts
+        WHERE slug = ?
+    `, slug)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
 func ToDisplay(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -203,5 +222,24 @@ func SinglePost(db *sql.DB) http.HandlerFunc {
 			}
 		}
 		json.NewEncoder(w).Encode(post)
+	}
+}
+
+func DeletePost(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		err := DeletePostDb(db, r.PathValue("slug"))
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Post not found", http.StatusNotFound)
+				return
+			} else {
+				log.Println("error getting post:", err)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 }

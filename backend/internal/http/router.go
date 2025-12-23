@@ -24,6 +24,7 @@ func Router(db *sql.DB) http.Handler {
 	adminRouter.Handle("POST /add-post", posts.Create(db))
 	adminRouter.Handle("GET /posts", posts.List(db))
 	adminRouter.Handle("GET /posts/{slug}", posts.SinglePost(db))
+	adminRouter.Handle("DELETE /posts/{slug}", posts.DeletePost(db))
 
 	mux.Handle("/api/admin/", http.StripPrefix("/api/admin", auth.RequireAuth(adminRouter)))
 
