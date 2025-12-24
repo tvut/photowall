@@ -4,6 +4,7 @@
 	import { deletePost } from '$lib/api/posts';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
+	import { resolve } from '$app/paths';
 
 	let { data }: PageProps = $props();
 
@@ -30,10 +31,10 @@
 
 <ul class="list bg-base-100 rounded-box shadow-md">
 	<li class="p-4 pb-2 text-xl tracking-wide">Posts</li>
-	{#each data.posts as post}
+	{#each data.posts as post (post.slug)}
 		<li class="list-row flex">
 			<button
-				onclick={() => goto(`/admin/edit/${post.slug}`)}
+				onclick={() => goto(resolve(`/admin/edit/${post.slug}`))}
 				class="flex-1 flex items-center gap-4 p-4 text-left hover:bg-base-200"
 			>
 				<div class="text-xl tabular-nums">

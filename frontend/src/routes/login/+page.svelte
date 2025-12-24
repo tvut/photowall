@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { apiFetch } from '$lib/api';
+	import { resolve } from '$app/paths';
 
 	let username = '';
 	let password = '';
@@ -17,11 +18,11 @@
 			});
 
 			if (res.ok) {
-				goto('/admin');
+				goto(resolve('/admin'));
 			} else {
 				error = 'Invalid credentials';
 			}
-		} catch (e) {
+		} catch {
 			error = 'Login failed. Please try again.';
 		} finally {
 			isLoading = false;

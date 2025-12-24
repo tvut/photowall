@@ -1,6 +1,7 @@
 import { apiFetch } from '../api';
 import { goto, invalidateAll } from '$app/navigation';
 import { toast } from 'svelte-sonner';
+import { resolve } from '$app/paths';
 
 export async function updatePostStatus(slug: string, status: string): Promise<void> {
 	try {
@@ -66,8 +67,8 @@ export async function createPost(title: string): Promise<void> {
 	});
 
 	if (res.ok) {
-		let slug = await res.text();
-		goto('/admin/edit/' + slug);
+		const slug = await res.text();
+		goto(resolve('/admin/edit/' + slug));
 	} else {
 		console.error('Failed to create post, response: ' + res);
 		toast.error('Failed to create post');

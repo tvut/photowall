@@ -2,6 +2,7 @@
 	import { toast } from 'svelte-sonner';
 	import { updatePostStatus, updatePostDisplayTime, deletePost } from '$lib/api/posts';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const { post } = $props<{
 		post: {
@@ -42,7 +43,7 @@
 				isDeleting = true;
 				await deletePost(post.slug);
 				toast.success('Post deleted successfully');
-				await goto('/admin');
+				await goto(resolve('/admin'));
 			} catch (error) {
 				console.error('Error deleting post:', error);
 				toast.error('Failed to delete post');
@@ -95,7 +96,7 @@
 				</div>
 			</div>
 			<div class="space-x-2">
-				<a href="/posts/{post.slug}" class="btn btn-outline w-40" target="_blank">
+				<a href={resolve(`/posts/${post.slug}`)} class="btn btn-outline w-40" target="_blank">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-5 w-5 mr-2"
