@@ -12,7 +12,7 @@
 </script>
 
 <div class="mb-8">
-	<h1 class="text-3xl font-bold text-gray-900">Edit Post: {data.post.title}</h1>
+	<h1 class="text-3xl font-bold">Edit Post: {data.post.title}</h1>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
 	<div class="lg:col-span-2">

@@ -8,10 +8,7 @@ export type Post = {
 	updatedAt: string;
 };
 
-export async function apiFetch(
-	path: string,
-	options: RequestInit = {}
-) {
+export async function apiFetch(path: string, options: RequestInit = {}) {
 	return fetch(`${API}${path}`, {
 		credentials: 'include',
 		headers: {

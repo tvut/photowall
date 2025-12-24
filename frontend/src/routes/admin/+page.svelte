@@ -30,7 +30,6 @@
 
 <ul class="list bg-base-100 rounded-box shadow-md">
 	<li class="p-4 pb-2 text-xl tracking-wide">Posts</li>
-
 	{#each data.posts as post}
 		<li class="list-row flex">
 			<button
@@ -44,7 +43,11 @@
 					<div class="text-2xl">{post.title}</div>
 				</div>
 			</button>
-			<button class="btn btn-error w-40" onclick={() => handleDelete(post.slug, post.title)} disabled={isDeleting}>
+			<button
+				class="btn btn-error w-40"
+				onclick={() => handleDelete(post.slug, post.title)}
+				disabled={isDeleting}
+			>
 				{isDeleting ? 'Deleting...' : 'Delete Post'}
 			</button>
 		</li>
