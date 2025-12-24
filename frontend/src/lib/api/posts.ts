@@ -22,7 +22,7 @@ export async function updatePostStatus(slug: string, status: string): Promise<vo
 
 export async function updatePostDisplayTime(slug: string, displayTime: string): Promise<void> {
     try {
-        const formattedTime = new Date(displayTime + 'Z').toISOString();
+        const formattedTime = new Date(displayTime).toISOString();
         const res = await apiFetch(`/admin/posts/${slug}/display-time`, {
             method: 'PUT',
             body: JSON.stringify({ display_time: formattedTime })
@@ -36,6 +36,24 @@ export async function updatePostDisplayTime(slug: string, displayTime: string): 
         return;
     } catch (error) {
         console.error('Error updating display time:', error);
+        throw error;
+    }
+}
+
+export async function deletePost(slug: string): Promise<void> {
+    try {
+        const res = await apiFetch(`/admin/posts/${slug}`, {
+            method: 'DELETE'
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to delete post');
+        }
+
+        await invalidateAll();
+        return;
+    } catch (error) {
+        console.error('Error deleting post:', error);
         throw error;
     }
 }

@@ -1,14 +1,28 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import NewPost from '$components/admin/NewPost.svelte';
-	import { apiFetch } from '$lib/api';
+	import NewPost from '$lib/components/NewPost.svelte';
+	import { deletePost } from '$lib/api/posts';
+	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	async function deletePost(slug: string) {
-		await apiFetch(`/admin/posts/${slug}`, { method: 'DELETE' });
-		await invalidateAll();
+	let isDeleting = $state(false);
+
+	async function handleDelete(slug: string, title: string) {
+		if (confirm(`Are you sure you want to delete "${title}"?`)) {
+			try {
+				isDeleting = true;
+				await deletePost(slug);
+				toast.success('Post deleted successfully');
+				await invalidateAll();
+			} catch (error) {
+				console.error('Error deleting post:', error);
+				toast.error('Failed to delete post');
+			} finally {
+				isDeleting = false;
+			}
+		}
 	}
 </script>
 
@@ -30,21 +44,8 @@
 					<div class="text-2xl">{post.title}</div>
 				</div>
 			</button>
-			<button
-				onclick={() => deletePost(post.slug)}
-				class="btn btn-square btn-ghost hover:bg-error"
-				aria-label={`Delete ${post.title}`}
-			>
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						stroke="currentColor"
-						fill="none"
-						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-					></path>
-				</svg>
+			<button class="btn btn-error w-40" onclick={() => handleDelete(post.slug, post.title)} disabled={isDeleting}>
+				{isDeleting ? 'Deleting...' : 'Delete Post'}
 			</button>
 		</li>
 	{/each}
