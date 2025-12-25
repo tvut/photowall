@@ -191,3 +191,33 @@ func CreatePost(db *sql.DB, title string, displayTime time.Time) (string, error)
 
 	return slug, nil
 }
+
+func CreateImage(db *sql.DB, url string) (int64, error) {
+	result, err := db.Exec(`
+        INSERT INTO images (url) 
+        VALUES (?)
+    `, url)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func GetImageByUrl(db *sql.DB, url string) (int64, error) {
+	var id int64
+	err := db.QueryRow(`
+        SELECT id FROM images WHERE url = ?
+    `, url).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func AttachImageToPost(db *sql.DB, postId int, imageId int64, position int) error {
+	_, err := db.Exec(`
+        INSERT OR REPLACE INTO post_images (post_id, image_id, position) 
+        VALUES (?, ?, ?)
+    `, postId, imageId, position)
+	return err
+}

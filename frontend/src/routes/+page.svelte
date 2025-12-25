@@ -11,8 +11,9 @@
 
 <h1>Blog</h1>
 
-{#each posts as post (post.id)}
+{#each posts as post (post.slug)}
 	<article>
 		<h2>{post.title}</h2>
+		<p>{post.photos}</p>
 	</article>
 {/each}

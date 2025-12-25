@@ -1,11 +1,10 @@
-import { apiFetch } from '../api';
-import { goto, invalidateAll } from '$app/navigation';
+import { apiFetchJson } from '../api';
+import { invalidateAll } from '$app/navigation';
 import { toast } from 'svelte-sonner';
-import { resolve } from '$app/paths';
 
 export async function updatePostStatus(slug: string, status: string): Promise<void> {
 	try {
-		const res = await apiFetch(`/admin/posts/${slug}/status`, {
+		const res = await apiFetchJson(`/admin/posts/${slug}/status`, {
 			method: 'PUT',
 			body: JSON.stringify({ status })
 		});
@@ -25,7 +24,7 @@ export async function updatePostStatus(slug: string, status: string): Promise<vo
 export async function updatePostDisplayTime(slug: string, displayTime: string): Promise<void> {
 	try {
 		const formattedTime = new Date(displayTime).toISOString();
-		const res = await apiFetch(`/admin/posts/${slug}/display-time`, {
+		const res = await apiFetchJson(`/admin/posts/${slug}/display-time`, {
 			method: 'PUT',
 			body: JSON.stringify({ display_time: formattedTime })
 		});
@@ -44,7 +43,7 @@ export async function updatePostDisplayTime(slug: string, displayTime: string): 
 
 export async function deletePost(slug: string): Promise<void> {
 	try {
-		const res = await apiFetch(`/admin/posts/${slug}`, {
+		const res = await apiFetchJson(`/admin/posts/${slug}`, {
 			method: 'DELETE'
 		});
 
@@ -60,15 +59,15 @@ export async function deletePost(slug: string): Promise<void> {
 	}
 }
 
-export async function createPost(title: string): Promise<void> {
-	const res = await apiFetch('/admin/add-post', {
+export async function createPost(title: string): Promise<string> {
+	const res = await apiFetchJson('/admin/add-post', {
 		method: 'POST',
 		body: JSON.stringify({ title: title })
 	});
 
 	if (res.ok) {
 		const slug = await res.text();
-		goto(resolve('/admin/edit/' + slug));
+		return slug;
 	} else {
 		console.error('Failed to create post, response: ' + res);
 		toast.error('Failed to create post');

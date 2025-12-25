@@ -1,9 +1,9 @@
 import type { PageLoad } from './$types';
-import { apiFetch } from '$lib/api';
+import { apiFetchJson } from '$lib/api';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageLoad = async ({ params }) => {
-	const res = await apiFetch('/admin/posts/' + params.slug, {
+	const res = await apiFetchJson('/admin/posts/' + params.slug, {
 		method: 'GET'
 	});
 

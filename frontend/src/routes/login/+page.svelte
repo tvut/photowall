@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { apiFetch } from '$lib/api';
+	import { apiFetchJson } from '$lib/api';
 	import { resolve } from '$app/paths';
 
 	let username = '';
@@ -12,7 +12,7 @@
 		error = '';
 		isLoading = true;
 		try {
-			const res = await apiFetch('/login', {
+			const res = await apiFetchJson('/login', {
 				method: 'POST',
 				body: JSON.stringify({ username, password })
 			});

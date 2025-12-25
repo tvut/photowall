@@ -1,19 +1,20 @@
 const API = 'http://localhost:8080/api';
 
 export type Post = {
-	id: string;
 	title: string;
-	content: string;
-	createdAt: string;
-	updatedAt: string;
+	slug: string;
+	display_time: Date;
+	photos: string[];
 };
 
-export async function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetchJson(path: string, options: RequestInit = {}) {
+	const defaultHeaders: Record<string, string> = {
+		'Content-Type': 'application/json'
+	};
+
 	return fetch(`${API}${path}`, {
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json'
-		},
+		headers: defaultHeaders,
 		...options
 	});
 }

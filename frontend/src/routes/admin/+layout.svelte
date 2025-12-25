@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { apiFetchJson } from '$lib/api';
 
 	let { children } = $props();
 
-	import { apiFetch } from '$lib/api';
-
 	async function logout() {
-		await apiFetch('/logout', { method: 'POST' });
-		location.href = '/login';
+		await apiFetchJson('/logout', { method: 'POST' });
+		goto(resolve('/login'));
 	}
 </script>
 
